@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Veri ve modeller (repoya girmez, boyut büyük)
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+
+# Kullanıcı yüklemeleri / geçici çıktılar
+uploads/
+outputs/
+*.png
+*.jpg
+*.jpeg
+!docs/**/*.png
+
+# OS / editör
+.DS_Store
+.idea/
+.vscode/

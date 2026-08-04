@@ -1,0 +1,20 @@
+# --- Prototip (Aşama 1) ---
+streamlit>=1.30
+pillow>=10.0
+numpy>=1.24
+scikit-learn>=1.3        # k-means renk çıkarımı
+rembg>=2.0               # arka plan kaldırma (hazır U²-Net)
+onnxruntime>=1.16        # rembg backend
+
+# --- ML / eğitim (Aşama 2+) ---
+torch>=2.1
+torchvision>=0.16
+transformers>=4.35       # Hugging Face modelleri
+pandas>=2.0
+matplotlib>=3.7
+
+# --- Kombin uyumu / arama (Aşama 3+) ---
+faiss-cpu>=1.7           # embedding benzerlik araması
+
+# --- Geliştirme ---
+jupyter>=1.0
