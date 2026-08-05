@@ -14,6 +14,10 @@ data/*
 !data/.gitkeep
 models/*
 !models/.gitkeep
+*.pt
+
+# Ultralytics runtime config (kullanıcıya özel, otomatik oluşur)
+Ultralytics/
 
 # Kullanıcı yüklemeleri / geçici çıktılar
 uploads/
