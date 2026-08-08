@@ -18,7 +18,7 @@ import numpy as np
 from PIL import Image, ImageOps
 from sklearn.cluster import KMeans
 
-__all__ = ["ColorExtractor", "extract_dominant_colors"]
+__all__ = ["ColorExtractor", "extract_dominant_colors", "extract_colors"]
 
 
 class ColorExtractor:
@@ -36,8 +36,22 @@ class ColorExtractor:
             return []
 
         sampled_pixels = self._sample_pixels(opaque_pixels)
-        cluster_centers = self._cluster_pixels(sampled_pixels)
+        cluster_centers, _ratios = self._cluster_pixels(sampled_pixels)
         return self._format_dominant_colors(cluster_centers)
+
+    def extract_colors(
+        self, image_input: Image.Image | str | Path
+    ) -> list[dict[str, str | tuple[int, int, int] | tuple[float, float, float] | float]]:
+        """hex, rgb, hsv ve piksel oranını (ratio) içeren baskın renkleri döndürür."""
+        image = self._load_image(image_input)
+        opaque_pixels = self._extract_opaque_pixels(image)
+
+        if opaque_pixels.shape[0] == 0:
+            return []
+
+        sampled_pixels = self._sample_pixels(opaque_pixels)
+        cluster_centers, ratios = self._cluster_pixels(sampled_pixels)
+        return self._format_colors_with_ratio(cluster_centers, ratios)
 
     def _load_image(self, image_input: Image.Image | str | Path) -> Image.Image:
         image = self._resolve_input_image(image_input)
@@ -76,7 +90,7 @@ class ColorExtractor:
         indices = rng.choice(pixels.shape[0], size=self.sample_size, replace=False)
         return pixels[indices]
 
-    def _cluster_pixels(self, pixels: np.ndarray) -> np.ndarray:
+    def _cluster_pixels(self, pixels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         n_clusters = min(self.n_colors, pixels.shape[0])
         pixels = np.nan_to_num(pixels, nan=0.0, posinf=255.0, neginf=0.0)
         kmeans = KMeans(
@@ -89,7 +103,9 @@ class ColorExtractor:
         kmeans.fit(pixels)
         counts = np.bincount(kmeans.labels_, minlength=n_clusters)
         order = np.argsort(counts)[::-1]
-        return np.round(kmeans.cluster_centers_[order]).astype(int)
+        centers = np.round(kmeans.cluster_centers_[order]).astype(int)
+        ratios = counts[order].astype(float) / counts.sum()
+        return centers, ratios
 
     def _format_dominant_colors(self, centers: np.ndarray) -> list[dict[str, str | tuple[float, float, float]]]:
         return [
@@ -98,6 +114,19 @@ class ColorExtractor:
                 "hsv": self._rgb_to_hsv(center),
             }
             for center in centers
+        ]
+
+    def _format_colors_with_ratio(
+        self, centers: np.ndarray, ratios: np.ndarray
+    ) -> list[dict[str, str | tuple[int, int, int] | tuple[float, float, float] | float]]:
+        return [
+            {
+                "hex": self._rgb_to_hex(center),
+                "rgb": tuple(int(c) for c in center),
+                "hsv": self._rgb_to_hsv(center),
+                "ratio": round(float(ratio), 4),
+            }
+            for center, ratio in zip(centers, ratios)
         ]
 
     @staticmethod
@@ -131,6 +160,25 @@ def extract_dominant_colors(
     """
     extractor = ColorExtractor(n_colors=n_colors, sample_size=sample_size)
     return extractor.extract(image_input)
+
+
+def extract_colors(
+    image_input: Image.Image | str | Path,
+    n_colors: int = 3,
+    sample_size: int = 50000,
+) -> list[dict[str, str | tuple[int, int, int] | tuple[float, float, float] | float]]:
+    """Baskın renkleri hex/rgb/hsv/ratio alanlarıyla döndürür.
+
+    Parameters:
+        image_input: RGBA image veya görüntü dosya yolu.
+        n_colors: Döndürülecek baskın renk sayısı.
+        sample_size: KMeans kümeleme için kullanılacak maksimum piksel sayısı.
+
+    Returns:
+        Her biri "hex", "rgb", "hsv", "ratio" anahtarlarını içeren sözlük listesi.
+    """
+    extractor = ColorExtractor(n_colors=n_colors, sample_size=sample_size)
+    return extractor.extract_colors(image_input)
 
 
 def main(argv: list[str] | None = None) -> int:
