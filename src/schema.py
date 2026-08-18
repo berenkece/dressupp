@@ -7,6 +7,12 @@ arayüz) bu sınıfları kullanarak veriyi diskten okur ve yazar.
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+# Geçerli kategori/stil/mevsim değerleri. Diğer modüller (ör. tagging) bu
+# sabitleri buradan import ederek tek bir kaynaktan referans alır.
+CATEGORIES: Tuple[str, ...] = ("top", "bottom", "shoes", "outerwear", "accessory")
+STYLES: Tuple[str, ...] = ("casual", "formal", "sport")
+SEASONS: Tuple[str, ...] = ("spring", "summer", "autumn", "winter", "all")
+
 
 class Color:
     """Bir görüntüden çıkarılan baskın rengi temsil eder."""
@@ -193,4 +199,4 @@ class Outfit:
         return f"Outfit(id={self.id!r}, name={self.name!r})"
 
 
-__all__ = ["Color", "ClothingItem", "Outfit"]
+__all__ = ["Color", "ClothingItem", "Outfit", "CATEGORIES", "STYLES", "SEASONS"]

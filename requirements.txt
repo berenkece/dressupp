@@ -9,7 +9,13 @@ onnxruntime>=1.16        # rembg backend
 # --- ML / eğitim (Aşama 2+) ---
 torch>=2.1
 torchvision>=0.16
-transformers>=4.35       # Hugging Face modelleri
+# transformers>=4.46 varsayılan olarak trust_remote_code modellerini "meta"
+# cihazda başlatıyor; Marqo/marqo-fashionSigLIP'in özel __init__ kodu (src/tagging.py)
+# bunu desteklemediği için "Cannot copy out of meta tensor" hatasıyla çöküyor.
+transformers>=4.35,<4.46 # Hugging Face modelleri
+ftfy>=6.1                # Marqo/marqo-fashionSigLIP'in trust_remote_code bağımlılığı
+open_clip_torch>=2.24    # Marqo/marqo-fashionSigLIP'in trust_remote_code bağımlılığı
+datasets>=2.14           # Marqo/polyvore kombin veri setini yüklemek için (train_compat_model.py)
 pandas>=2.0
 matplotlib>=3.7
 
